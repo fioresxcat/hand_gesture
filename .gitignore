@@ -1,0 +1,10 @@
+classification_data
+classification_data_features
+classification_data_masked_unet
+original_segment_mask
+segment_data
+*/ckpt*
+*/runs
+ipn_hand_data
+*/videos
+hand_detect/yolo_hagrid_30k_split

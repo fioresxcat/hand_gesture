@@ -1,0 +1,8 @@
+path: /data3/users/tungtx2/hand_gesture/hand_detect/yolo_hagrid_30k_split
+train: train/images
+val: val/images
+test: test/images
+
+# class names
+names: 
+  0: 'hand'

@@ -1,0 +1,27 @@
+1. mô hinhg segment tay
+- đã xong và infer ra kết quả của unet
+ + khá tệ, nhiều case ko bắt được
+- đã train deeplabv3+ nhưng kết quả ko khá hơn nhiều lắm => dùng luôn kết quả của Unet
+
+2. vì segment tay đểu do data đểu => note ra 1 vài case cho thấy data bị sai tùm lum
+=> nghĩ đến việc dùng 1 bộ dữ liệu khác cũng khá đa dạng là HAGRID để detect tay
+=> đã train 1 mô hình yolov8s để detect tay trên bộ HAGRID rồi infer trên bộ IPN Hand này xem sao
+ + tuy nhiên kết quả khá tệ, ko khá hơn segment là mấy
+=> Kết quả chạy để ở trong bộ dữ liệu classification_data với mỗi ảnh có 1 file txt là nhãn tương ứng.
+  Khi nào cần chạy lại demo thì chỉ cần visualize lên thôi
+
+2. mô hình 3d_cnn
+- đã train với dữ liệu segment từ unet
+=> train_acc 0.999 nhưng val_acc chỉ được 0.902 => có thể overfit do đang thiếu augmentation
+
+- train với dữ liệu ảnh gốc luôn ko qua bước segment tiền xử lý gì cả
+=> train acc 1.0, val_acc 0.941 => tốt hơn hẳn => do segment bị sida vkl
+=> ko theo hương segment tiền xử lý nữa mà làm trực tiếp trên ảnh
+
+3. train mô hình cnn
+- đang train trên gpu3
+- đã train, accuracy tập train rất cao nhưng tập val quá thấp, được có hơn 70%
+
+4. train mô hình lstm
+- dựa trên output là vector infer ra từ mô hình cnn
+- độ chính xác chỉ được hơn 80%

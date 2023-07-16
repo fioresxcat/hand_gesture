@@ -1,0 +1,131 @@
+# pytorch_lightning==1.9.5
+seed_everything: true
+trainer:
+  devices:
+  - 0
+  max_epochs: 100
+  min_epochs: 30
+  accelerator: gpu
+  precision: 16
+  accumulate_grad_batches: 3
+  auto_lr_find: false
+  profiler: null
+
+  logger:
+    class_path: pytorch_lightning.loggers.TensorBoardLogger
+    init_args:
+      save_dir: 'ckpt/exp3_deeplabv3+'
+      name: ''
+      version: ''
+
+  callbacks:
+    - class_path: pytorch_lightning.callbacks.ModelCheckpoint
+      init_args:
+        dirpath: ${trainer.logger.init_args.save_dir}
+        filename: '{epoch}-{train_loss:.3f}-{val_loss:.3f}-{train_iou:.3f}-{val_iou:.3f}-{train_f1:.3f}-{val_f1:.3f}'
+        monitor: val_f1
+        save_top_k: 3
+        mode: max
+        every_n_epochs: 1
+        auto_insert_metric_name: true
+
+    - class_path: pytorch_lightning.callbacks.EarlyStopping
+      init_args:
+        monitor: ${trainer.callbacks[0].init_args.monitor}
+        patience: 15
+        mode: ${trainer.callbacks[0].init_args.mode}
+
+    - class_path: RichProgressBar
+      init_args:
+        leave: true
+
+    - class_path: LearningRateMonitor
+      init_args:
+        logging_interval: step
+    
+    - class_path: RichModelSummary
+      init_args:
+        max_depth: 1
+
+  overfit_batches: 0.0
+  fast_dev_run: false
+  log_every_n_steps: 3
+  check_val_every_n_epoch: 1
+  auto_scale_batch_size: false
+  limit_train_batches: null
+  limit_val_batches: null
+  limit_test_batches: null
+  limit_predict_batches: null
+
+  default_root_dir: null
+  gradient_clip_val: null
+  gradient_clip_algorithm: null
+  num_processes: null
+  track_grad_norm: -1
+  val_check_interval: null
+  num_sanity_val_steps: 2
+  benchmark: null
+  deterministic: null
+  reload_dataloaders_every_n_epochs: 0
+  replace_sampler_ddp: true
+  detect_anomaly: false
+  plugins: null
+  amp_backend: null
+  amp_level: null
+  move_metrics_to_cpu: false
+  multiple_trainloader_mode: max_size_cycle
+  inference_mode: true
+
+ 
+model:
+  model:
+    class_path: segmentation_models_pytorch.DeepLabV3Plus
+    init_args:
+      encoder_name: efficientnet-b0
+      encoder_depth: 5
+      encoder_weights: imagenet
+      in_channels: 3
+      classes: 1
+
+  learning_rate: 1.0e-3
+
+  criterion:
+    class_path: loss.DiceLoss
+    init_args:
+      mode: binary
+      from_logits: true
+  
+  iou:
+    class_path: torchmetrics.classification.JaccardIndex
+    init_args:
+      task: binary
+      threshold: 0.5
+      average: micro
+
+  f1:
+    class_path: torchmetrics.classification.F1Score
+    init_args:
+      task: binary
+      threshold: 0.5
+      average: micro
+        
+data:
+  train_dir: '/data3/users/tungtx2/hand_gesture/segment_data/train'
+  val_dir: '/data3/users/tungtx2/hand_gesture/segment_data/val'
+  test_dir: '/data3/users/tungtx2/hand_gesture/segment_data/test'
+  predict_dir: '/data3/users/tungtx2/hand_gesture/segment_data/test'
+
+  data_cfg: 
+    n_sample_per_vid: 500
+    input_size:
+    - 320
+    - 256
+    augment_props:
+      augment_img_prob: 0.3
+
+  training_cfg:
+    bs: 48
+    shuffle_train: true
+    num_workers: 8
+
+ckpt_path: null
